@@ -1,52 +1,21 @@
-from core.checkers import python_checker, node_checker, dotnet_checker
 import typer
 import os
+from typing import Union, Literal
+from core.functions import checker_functions
 
 app: typer.Typer = typer.Typer(help="🔍 DepCheck GT: Verificador de dependencias obsoletas")
 
 @app.command()
-def python(path: str = "./examples/requirements.txt"):
-    """Verifica dependencias en un archivo requirements.txt"""
-    if (not path.endswith(".txt")):
-        typer.echo("❌ El archivo debe tener extensión .txt")
-        raise typer.Exit(code=1)
-    if (not os.path.isfile(path)):
-        typer.echo("❌ El archivo no existe")
-        raise typer.Exit(code=1)
-    results = python_checker.check_dependencies(path)
-    typer.echo("\n🐍 Resultados de dependencias (Python):\n")
-    for r in results:
-        r.show()
-
-@app.command()
-def node(path: str = "./examples/package.json"):
-    """Verifica dependencias en un archivo package.json de Node.js"""
-    if (not path.endswith(".json")):
-        typer.echo("❌ El archivo debe tener extensión .json")
-        raise typer.Exit(code=1)
-    if (not os.path.isfile(path)):
-        typer.echo("❌ El archivo no existe")
-        raise typer.Exit(code=1)
-    package_json = node_checker.load_package_json(path)
-    results = node_checker.check_dependencies(package_json)
-    typer.echo("\n📦 Resultados de dependencias (Node.js):\n")
-    for r in results:
-        r.show()
-
-@app.command()
-def dotnet(path: str = "./examples/Proyecto.csproj"):
-    """Verifica dependencias en un archivo .csproj de .NET"""
-    if (not path.endswith(".csproj")):
-        typer.echo("❌ El archivo debe tener extensión .csproj")
-        raise typer.Exit(code=1)
-    if (not os.path.isfile(path)):
-        typer.echo("❌ El archivo no existe")
-        raise typer.Exit(code=1)
-    results = dotnet_checker.check_dependencies(path)
-    typer.echo("\n🧰 Resultados de dependencias (.NET):\n")
-    for r in results:
-        r.show()
+def check(language: Literal['python', 'node', 'c#'] = 'python', path: str = './examples/requirements.txt') -> None:
+    """Verifica dependencias en el archivo especificado."""
+    if language == 'python' and path.endswith('.txt'):
+        checker_functions.check_python(path)
+    elif language == 'node' and path.endswith('.json'):
+        checker_functions.check_node(path)
+    elif language == 'c#' and path.endswith('.csproj'):
+        checker_functions.check_dotnet(path)
+    else:
+        typer.echo("Lenguaje no soportado o extensión de archivo no válida.")
 
 if __name__ == "__main__":
     app()
-
